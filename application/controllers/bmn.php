@@ -491,13 +491,13 @@ class Bmn extends CI_Controller {
 
 	function nd(){
 		$barcode= $this->uri->segment(3);
-		$nama=$this->session->userdata('nama');
+		$nip=$this->session->userdata('nip');
 		$panggil=$this->session->userdata('panggil');
 		$keruksakan=$this->input->post('uraiankeruksakan');
 		$sps = array 	(	'no' 					=> '',
 										'nosps'				=> '',
 		 								'barcode'			=>$barcode,
-										'nama'				=>$nama,
+										'nama'				=>$nip,
 										'keruksakan'	=>$keruksakan,
 										'tanggal'			=>date('Y-m-d')
 									);
@@ -507,7 +507,7 @@ class Bmn extends CI_Controller {
 			$query= $this->Bmn_model->sps($sps);
 			$data['aset']= $this->Bmn_model->barcode($barcode)->row();
 			$wherepns='nama';
-			$nilai=	$nama;
+			$nilai=	$nip;
 			$data['user']= $this->Bmn_model->wherepns($wherepns, $nilai)->row();
 			$data['keruksakan']=$keruksakan;
 			$this->load->view('ndperbaikan',$data);

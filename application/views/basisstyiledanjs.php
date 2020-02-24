@@ -3,7 +3,7 @@
   <link rel="stylesheet" href="<?= base_url()."assets/jquery-ui-1.12.1/jquery-ui.css" ;?>">
   <script src="<?= base_url()."assets/js/bootstrap.js" ;?>"></script>
   <script src="<?= base_url()."assets/jquery-3.4.1.js" ;?>"></script>
-  <script src="<?= base_url()."assets/popper.js-master/packages/popper/bundle.js" ;?>"></script>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
   <script src="<?= base_url()."assets/jquery-ui-1.12.1/jquery-ui.js" ;?>"></script>
 
   <style>
