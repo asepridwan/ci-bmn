@@ -258,39 +258,44 @@ class Bmn extends CI_Controller {
 //ini bener bener yang menjadi judul projek ini
 
 	function bast(){
-		$date= array	(	'tgl' => date('d'),
-										'bln' => date('m'),
-										'thn' => date('Y')
-									);
-		$data['noawal']= $this->Bmn_model->maxnobast($date)->row()->no;
-		$data['date']=$date;
+		$tahun=date('Y');
+		$data['noawal']= $this->Bmn_model->maxnobast($tahun)->row()->maxno;
+
 		if(is_null($this->input->post('bast'))){
 			$this->load->view('bast', $data);
 		}else {
 			$wherepns='nama';
 			$nilai=$this->input->post('user');
 			$nip= ($this->Bmn_model->wherepns($wherepns, $nilai)->row()->nip);
-			//bikin cegahan user ! pns
-			if ($this->Bmn_model->wherepns($wherepns, $nilai)->num_rows()>0) {
-				$data= array(	'no'=> $this->input->post('no'),
-											'bast'=> $this->input->post('bast'),
-											'user'=> $this->input->post('user'),
-											'nip_user'=> $nip
-										);
-				$this->session->set_userdata($data);
-				redirect(base_url().'bmn/formbarcode');
-			}else {
-				$this->session->set_flashdata('error', 'Nama '.$nilai.' tidak terdaftar di database');
+			//bikin cegahan bast yang sudah ada
+			$bast=$this->input->post('bast');
+
+			if ($this->Bmn_model->bastada($bast)==TRUE) {
+				$this->session->set_flashdata('error', 'BAST SUDAH DI REKAM SILAHKAN GUNAKAN NOMOR LAIN ');
 				redirect(base_url().'bmn/bast');
+			}else {
+				//bikin cegahan user ! pns
+				if ($this->Bmn_model->wherepns($wherepns, $nilai)->num_rows()>0) {
+					$data= array(	'no'=> $this->input->post('no'),
+												'bast'=> $this->input->post('bast'),
+												'user'=> $this->input->post('user'),
+												'nip_user'=> $nip
+											);
+					$this->session->set_userdata($data);
+					redirect(base_url().'bmn/formbarcode');
+				}else {
+					$this->session->set_flashdata('error', 'Nama '.$nilai.' tidak terdaftar di database');
+					redirect(base_url().'bmn/bast');
+				}
 			}
 		}
-		$this->session->set_userdata($date);
+		$this->session->set_userdata('tgl', date('Y-m-d'));
 	}
 
 	function formbarcode(){
 		$this->load->view('formbarcode');
 		$bast= $this->session->userdata('bast');
-		$data['aset']= $this->Bmn_model->arraydipilih($bast)->result();
+		$data['aset']= $this->Bmn_model->arraydipilih($bast)->result_array();
 		$this->load->view('arraydipilih', $data);
 	}
 
@@ -309,9 +314,7 @@ class Bmn extends CI_Controller {
 												'nip'			=>$this->session->userdata('nip_user'),
 												'no'			=>$this->session->userdata('no'),
 												'bast'		=>$this->session->userdata('bast'),
-												'tgl'			=>$this->session->userdata('tgl'),
-												'bln'			=>$this->session->userdata('bln'),
-												'thn'			=>$this->session->userdata('thn')
+												'tgl'			=>$this->session->userdata('tgl')
 											);
 				if($this->Bmn_model->insertbast($adata)>0){
 					$asetdata = array (	'lokasi' 		=> $lokasi,
@@ -398,8 +401,13 @@ class Bmn extends CI_Controller {
 
 
 	function lab(){
-		if($this->session->userdata())
-		$this->load->view('lab');
+		$tahun=date('Y');
+		$nobast6digit= $this->Bmn_model->maxnobast($tahun)->row()->maxno;
+
+
+
+		// if($this->session->userdata())
+		// $this->load->view('lab');
 		//sprintf('%04d', $this->input->post('nup'));
 		// echo uniqid();
 		// $this->load->view("lab");

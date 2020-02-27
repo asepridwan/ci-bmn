@@ -21,9 +21,8 @@ class Bmn_model extends CI_Model{
     $this->db->distinct();
     return $this->db->get('bast');
   }
-  function maxnobast($date){
-    $this->db->select_max('no');
-    return $this->db->get('bast');
+  function maxnobast($tahun){
+    return $this->db->query("SELECT MAX(no) AS 'maxno' FROM `bast` WHERE `tgl` BETWEEN '$tahun-01-01' AND '$tahun-12-31' ");
   }
   function bast($nip){
     $this->db->where('nip', $nip);
@@ -45,6 +44,10 @@ class Bmn_model extends CI_Model{
     $this->db->where('bast', $bast);
     $this->db->where('nip', $nip);
     return $this->db->get('bast');
+  }
+
+  function bastada($bast){
+    return $this->db->get_where('bast', array('bast', $bast));
   }
 
 

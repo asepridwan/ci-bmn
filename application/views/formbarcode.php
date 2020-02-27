@@ -5,14 +5,25 @@
 
 </head>
 <body>
-  <?php include_once 'navbar-atas/awal.php';?>
-  <!-- gak usah pake input type hiddent karena sudah pake session -->
+<?php include_once 'navbar-atas/awal.php';?>
+<div class="container">
+  <p><strong>
+    <?= $this->session->userdata('user')."<br>".$this->session->userdata('bast'); ?>
+  </strong></p>
   <form method="post" action="<?= base_url(); ?>bmn/insertbast">
-    <input type="text" name="barcode" placeholder="nomor barcode aset" required autofocus><br>
-    <input type="text" name="lokasi" placeholder="Lokasi " required ><br>
-    <input type="text" name="pengguna" placeholder="Pengguna" required >
-    <button type="submit">submit</button>
+    <div class="form-group">
+      <input type="text" name="barcode" class="form-control" placeholder="Barcode" required>
+    </div>
+    <div class="form-group">
+      <input type="text" name="lokasi" class="form-control" placeholder="Lokasi" required>
+    </div>
+    <div class="form-group">
+      <input type="text" name="pengguna" class="form-control" placeholder="Pengguna" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
   </form>
-  <?= $this->session->flashdata('error');?>
+
+  <p style="color:red;"><?= $this->session->flashdata('error');?></p>
+</div>
 </body>
 </html>

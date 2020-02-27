@@ -43,7 +43,7 @@
 <?php
 include_once 'navbar-atas/awal.php';
 $x=$noawal+1;
-$nobast= "BASTBMN-".$x."/SET.M.EKON.3.3/".$date['bln']."/".$date['thn'];
+$nobast= "BASTBMN-".$x."/SET.M.EKON.3.3/".date('m')."/".date('Y');
 ?>
 <div class="container">
   <div class="row">

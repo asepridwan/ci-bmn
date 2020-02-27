@@ -25,7 +25,7 @@
  */
 
 // Include the main TCPDF library (search for installation path).
-$this->load->library('Pdf');
+require_once('application\libraries\TCPDF\tcpdf.php');
 
 // Extend the TCPDF class to create custom Header and Footer
 class MYPDF extends TCPDF {
@@ -211,7 +211,7 @@ $txtL.=     '<tr>
             </tr>';}
 if(isset($aset)){
 $txtL.=     '<tr>
-              <td colspan="3"><p style="text-indent: 30px">Bersama ini melaporkan bahwa BMN jenis '.$aset->jenisBarang.' Merk '.$aset->merkType.' dengan nomor NUP '.$aset->Barcode.' perlu dilakukan perbaikan/service, karena '.$keruksakan.'.</p></td>
+              <td colspan="3"><p style="text-indent: 30px">Bersama ini melaporkan bahwa BMN jenis '.$aset->jenis_barang.' Merk '.$aset->merk_type.' dengan nomor NUP '.$aset->barcode.' perlu dilakukan perbaikan/service, karena '.$keruksakan.'.</p></td>
               <td></td>
               <td></td>
             </tr>';}
