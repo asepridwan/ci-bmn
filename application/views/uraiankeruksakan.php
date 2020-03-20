@@ -157,9 +157,9 @@ margin-right: 7px;
 							</div><!-- Widget Area -->
 						</div>
     </div>
+    *) Setelah klik kirim, dimohon untuk:<br>
+    # Print ND tersebut<br>
+    # Dilengkapi Nomor Nota Dinas dari unit User bersangkutan<br>
+    # Ditandatangan oleh user bersangkutan<br>
+    # Dikirim ke Bagian Pengelolaan Barang Milik Negara (BMN).
 </div>
-*) Setelah klik kirim, dimohon untuk:<br>
-# Print ND tersebut<br>
-# Dilengkapi Nomor Nota Dinas dari unit User bersangkutan<br>
-# Ditandatangan oleh user bersangkutan<br>
-# Dikirim ke Bagian Pengelolaan Barang Milik Negara (BMN).

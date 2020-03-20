@@ -28,37 +28,10 @@
 require_once('application\libraries\TCPDF\tcpdf.php');
 
 // Extend the TCPDF class to create custom Header and Footer
-class MYPDF extends TCPDF {
+class MYPDF extends TCPDF
+{
 
-	//Page header
-	public function Header() {
-		// Logo
-		$image_file = K_PATH_IMAGES.'Garuda_Pancasila.png';
-		$this->Image($image_file, 98, 12, 22, '', 'png', '', 'C', false, 300, '', false, false, 0, false, false, false);
-		// Set font
-		$this->SetFont('Helvetica', 'B', 14);
-		// Title
-		$html1='<br><br><br><br><br><br>KEMENTERIAN KOORDINATOR BIDANG PEREKONOMIAN<br>REPUBLIK INDONESIA';
-		$this->writeHTML($html1, true, false, false, false, 'C');
-		$this->SetFont('Helvetica', '', 10);
-		$html2='Jl. Lapangan Banteng Timur Nomor 2-4 Jakarta 10710 Telp.(021)3521974 Fax.(021)3521985<br>website: www.ekon.go.id';
-		$this->writeHTML($html2, true, false, false, false, 'C');
-		$html3='<hr>';
-		$this->writeHTML($html3, true, false, false, false, 'C');
-		// writeHTML($html, $ln=true, $fill=false, $reseth=false, $cell=false, $align='')
-	}
-
-	// Page footer
-	public function Footer() {
-		// Position at 15 mm from bottom
-		$this->SetY(-15);
-		// Set font
-		$this->SetFont('helvetica', 'I', 8);
-		// Page number
-		// $this->Cell(0, 10, 'Lembar ke '.$this->getAliasNumPage().' dari '.$this->getAliasNbPages().' lembar', 0, false, 'R', 0, '', 0, false, 'T', 'M');
-	}
 }
-
 // create new PDF document
 $pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
@@ -69,33 +42,23 @@ $pdf->SetTitle('Berita Acara');
 $pdf->SetSubject('BAST');
 $pdf->SetKeywords('TCPDF, PDF, BAST, BAPP, BMN');
 
-// set default header data
-$pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PDF_HEADER_STRING);
-
-// set header and footer fonts
-$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+// remove default header/footer
+$pdf->setPrintHeader(false);
+$pdf->setPrintFooter(false);
 
 // set default monospaced font
 $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 // set margins
-$pdf->SetMargins(25, 60, 15);
-$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+$pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+// $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+// $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 
 // set auto page breaks
 $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
 
 // set image scale factor
 $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-// set some language-dependent strings (optional)
-if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-	require_once(dirname(__FILE__).'/lang/eng.php');
-	$pdf->setLanguageArray($l);
-}
-
 // ---------------------------------------------------------
 
 // set font
@@ -104,38 +67,41 @@ $pdf->SetFont('helvetica', '', 12);
 // add a page
 $pdf->AddPage();
 
+$pdf->Image('application\views\Garuda_Pancasila.png', 0, 10, 0, 0, 'png', '', '', false, 80, 'C', false, false, 1, false, false, false);
+
 // set some text to print
 //dapatkan nama hari nama bulan teks tanggal teks tahun
 $bulan = array(
-                '01' => 'JANUARI',
-                '02' => 'FEBRUARI',
-                '03' => 'MARET',
-                '04' => 'APRIL',
-                '05' => 'MEI',
-                '06' => 'JUNI',
-                '07' => 'JULI',
-                '08' => 'AGUSTUS',
-                '09' => 'SEPTEMBER',
-                '10' => 'OKTOBER',
-                '11' => 'NOVEMBER',
-                '12' => 'DESEMBER',
+                '01' => 'Januari',
+                '02' => 'Februari',
+                '03' => 'Maret',
+                '04' => 'April',
+                '05' => 'Mei',
+                '06' => 'Juni',
+                '07' => 'Juli',
+                '08' => 'Agustus',
+                '09' => 'September',
+                '10' => 'Oktober',
+                '11' => 'Nopember',
+                '12' => 'Desember',
         );
 
-// if(isset($bast)){
-// $id= $bast->bast;
-// $tgl= $bast->tgl;
-// $userbast= $bast->user;
-// }
-$txt='	<br>
-        <strong>NOTA DINAS</strong>
+$txt1='	<br><br>
+        <strong>KEMENTERIAN KOORDINATOR BIDANG PEREKONOMIAN<br>
+				REPUBLIK INDONESIA</strong><br><br>website: www.ekon.go.id';
+$pdf->WriteHTML($txt1,true,false,false,false,'C');
+
+$txt2='	<hr>';
+$pdf->WriteHTML($txt2,true,false,false,false,'J');
+
+$txt3='	<strong>NOTA DINAS</strong>
 				<br>
-        <br>
-				Nomor : ND-................................................................/2019
+				Nomor : BM.3.7/................................................................/'.date('m').'/'.date('Y').'
 				<br>
         ';
-$pdf->WriteHTML($txt,true,false,false,false,'C');
+$pdf->WriteHTML($txt3,true,false,false,false,'C');
 
-$txtL=' <table>
+$txt4=' <table>
           <tr>
             <td width="8%">Perihal </td>
             <td width="2%">:</td>
@@ -171,107 +137,83 @@ $txtL=' <table>
             <td></td>
             <td><p style="text-indent: 20px">Tempat</p></td>
           </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td colspan="3"><p style="text-indent: 30px">Yang bertandatangan dibawah ini, Pegawai Negeri Sipil (PNS) Pengguna Barang Milik Negara (BMN): </p></td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-          </table>
-          <table>';
-if(isset($user)){
-$txtL.=     '<tr>
-              <td width="13%">Nama</td>
-              <td width="3%">:</td>
-              <td width="84%">'.$user->nama.'</td>
+				</table>';
+$pdf->WriteHTML($txt4,true,false,false,false,'J');
+
+$txt5= 'Yang bertandatangan dibawah ini, Pegawai Negeri Sipil (PNS) Pengguna Barang Milik Negara (BMN): ';
+$pdf->WriteHTML($txt5,true,false,false,false,'J');
+
+$txt6=   '<table>
+						<tr>
+              <td width="25%"><p style="text-indent: 30px">Nama</p></td>
+              <td width="2%">:</td>
+              <td width="73%">'.$user->nama.'</td>
             </tr>
             <tr>
-              <td>NIP</td>
+              <td><p style="text-indent: 30px">NIP</p></td>
               <td>:</td>
               <td>'.$user->nip.'</td>
             </tr>
             <tr>
-              <td>Unit Kerja </td>
+              <td><p style="text-indent: 30px">Unit Kerja </p></td>
               <td>:</td>
               <td>'.$user->unit.'</td>
             </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>';}
-if(isset($aset)){
-$txtL.=     '<tr>
-              <td colspan="3"><p style="text-indent: 30px">Bersama ini melaporkan bahwa BMN jenis '.$aset->jenis_barang.' Merk '.$aset->merk_type.' dengan nomor NUP '.$aset->barcode.' perlu dilakukan perbaikan/service, karena '.$keruksakan.'.</p></td>
-              <td></td>
-              <td></td>
-            </tr>';}
-$txtL.=    '<tr>
-              <td colspan="3"><p style="text-indent: 30px">Sehubungan dengan hal tersebut, kami mohon kiranya dapat dilaksanakan perbaikan/service dalam waktu yang tidak terlalu lama.</p></td>
-              <td></td>
-              <td></td>
+					</table><br>
+					Bersama ini melaporkan bahwa Barang Milik Negara (BMN):<br>
+					<table>
+						<tr>
+              <td width="25%"><p style="text-indent: 30px">Jenis</p></td>
+              <td width="2%">:</td>
+              <td width="73%">'.$aset->jenis_barang.'</td>
             </tr>
             <tr>
-              <td colspan="3"><p style="text-indent: 30px">Atas perhatian dan bantuannya, kami ucapkan terima kasih.</p></td>
-              <td></td>
-              <td></td>
+              <td><p style="text-indent: 30px">NUP</p></td>
+              <td>:</td>
+              <td>'.$aset->nup.'</td>
             </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </table>
-          <table>
-            <tr>
-              <td width="70%">Catatan Kabag BMN:</td>
-              <td>Jakarta, '.date('d').' '.mb_strtolower($bulan[date('m')]).' '.date('Y').'</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>PNS yang melaporkan</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td></td>
+					</table><br>
+					Yang berlokasi di:<br>
+					<table>
+						<tr>
+					  	<td width="25%"><p style="text-indent: 30px">Gedung</p></td>
+					    <td width="2%">:</td>
+					    <td width="73%">...............................................................................................................</td>
+					  </tr>
+					  <tr>
+					    <td><p style="text-indent: 30px">Lantai</p></td>
+					    <td>:</td>
+					    <td>...............................................................................................................</td>
+					  </tr>
+						<tr>
+					    <td><p style="text-indent: 30px">Ruang</p></td>
+					    <td>:</td>
+					    <td>...............................................................................................................</td>
+					  </tr>
+					</table>
+					<p style="text-indent: 30px">Perlu dilakukan perbaikan/service karena mengalami keruksakan atau perangkat tidak berfungsi baik sebagaimana mestinya.</p>
+					<p style="text-indent: 30px">Sehubungan dengan hal tersebut diatas, kami mohon kiranya dapat dilaksanakan perbaikan/service dalam waktu yang tidak terlalu lama.</p>
+					<p style="text-indent: 30px">Atas perhatian dan bantuan Saudara, kami ucapkan terima kasih.<br></p>';
+$pdf->WriteHTML($txt6,true,false,false,false,'J');
+
+	$txt7='	<table>
+						<tr>
+              <td width="58%"></td>
+              <td width="2%"></td>
+              <td width="40%">Jakarta, '.date('d').'-'.$bulan[date('m')].'-'.date('Y').'<br>PNS yang melaporkan</td>
             </tr>
             <tr>
               <td></td>
               <td></td>
+              <td><br><br><br><br></td>
             </tr>
             <tr>
               <td></td>
               <td></td>
+              <td>'.$user->nama.'<br>NIP. '.$user->nip.'</td>
             </tr>
-            <tr>
-              <td></td>';
-if(isset($user)){
-$txtL.=      '<td>'.$user->nama.'</td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>'.$user->nip.'</td>
-            </tr>
-          </table>';}
-$pdf->WriteHTML($txtL,true,false,false,false,'J');
+					</table>';
+$pdf->WriteHTML($txt7,true,false,false,false,'C');
 
 //Close and output PDF document
 $pdf->Output('NDpemeliharaan.pdf', 'I');

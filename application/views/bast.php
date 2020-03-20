@@ -68,11 +68,23 @@ $nobast= "BASTBMN-".$x."/SET.M.EKON.3.3/".date('m')."/".date('Y');
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
             <hr class="my-4">
+            <a style="float:left;" href="uploadbast">Upload BAST</a>
+            <a style="float:right;" href="drafbast">Draf BAST</a>
           </form>
         </div>
       </div>
     </div>
   </div>
-  <p id=error><?= $this->session->flashdata('error'); ?></p>
+  <?php if (!is_null($this->session->flashdata('error'))): ?>
+  <div class="alert alert-warning">
+    <strong>!. <?= $this->session->flashdata('error'); ?></strong>
+  </div>
+  <?php endif; ?>
+  <?php if (!is_null($this->session->flashdata('ok'))): ?>
+  <div class="alert alert-success">
+    <strong>!. <?= $this->session->flashdata('ok'); ?></strong>
+  </div>
+  <?php endif; ?>
 </div>
 </body>
+</html>

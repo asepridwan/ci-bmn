@@ -45,12 +45,9 @@ class Bmn extends CI_Controller {
 	}
 
 	function profil(){
-			$nip=$this->session->userdata('nip');
-			$wherepns='nip';
-			$nilai=$nip;
-			$truelogin=$this->Bmn_model->wherepns($wherepns, $nilai)->num_rows();
-			if($truelogin==1){
-				$data['biji']=$this->Bmn_model->wherepns($wherepns, $nilai)->row();
+		$nip= $this->session->userdata('nip');
+			if(!is_null($this->session->userdata('nip'))){
+				$data['biji']=$this->Bmn_model->wherepns('nip', $nip)->row();
 				$data['aset']= $this->Bmn_model->bastaktif($nip)->result();
 				$this->load->view('profil', $data);
 			}else {
@@ -215,6 +212,13 @@ class Bmn extends CI_Controller {
 
 // fungsi isian untuk tabel Aset
 	function insertaset(){
+		//authorized user only
+		if ($this->session->userdata('admin')!=1) {
+			echo "Mohon maaf, sistem hanya melayani pengguna terdaftar.!";
+			echo "<a href=".base_url()."> Login =>></a>";
+			exit();
+		}
+
 		if($this->input->post()==NULL){
 			$this->load->view('insertaset');
 		}else {
@@ -231,33 +235,84 @@ class Bmn extends CI_Controller {
 				//check jika aset sudah ada di database
 				$checkaset= $this->Bmn_model->barcode($barcode);
 				if($checkaset->num_rows()>0){
-					echo "aset sudah ada di database";
+					$this->session->set_flashdata('error', "aset sudah ada di database");
+					redirect(base_url()."bmn/insertaset");
 				}else {
 					//lanjut ke proses memasukan data
-					$data= array 	(	'barcode'				=>$barcode,
-					'jenis_barang'	=>$post['jenis_barang'],
-					'merk_type'			=>$post['merk_type'],
-					'nup'						=>$post['nup'],
-					'tgl_perolehan'	=>$post['tgl_perolehan'] );
-
+					$data= array 	(
+						'barcode'				=>$barcode,
+						'jenis_barang'	=>$post['jenis_barang'],
+						'merk_type'			=>$post['merk_type'],
+						'nup'						=>$post['nup'],
+						'tgl_perolehan'	=>$post['tgl_perolehan']
+					);
 					//reporting
 					$query= $this->Bmn_model->insertaset($data);
 					if($query==true){
-						echo "data berhasil di entri ";
+						$this->session->set_flashdata('ok', "data berhasil di entri");
+						redirect(base_url()."bmn/insertaset");
 					}else {
-						echo "data gagal di entri";
+						$this->session->set_flashdata('error', "data gagal di entri");
+						redirect(base_url()."bmn/insertaset");
 					}
 				}
 			}else {
-				echo "kode aset tidak ada di database silahkan input terlebih dahulu";
+				$this->session->set_flashdata('error', "kode aset tidak ada di database silahkan input terlebih dahulu <a href='".base_url()."/bmn/rekamkodeaset'>Rekam Kode Aset </a>");
+				redirect(base_url()."bmn/insertaset");
 			}
 		}
 	}
 
+	//merekam kode aset yang belum terekam
+	function createkodeaset(){
+		//authorized user only
+		if ($this->session->userdata('admin')!=1) {
+			echo "Mohon maaf, sistem hanya melayani pengguna terdaftar.!";
+			echo "<a href=".base_url()."> Login =>></a>";
+			exit();
+		}
+
+		//tampilkan form isian kode aset jika belum di isi
+		if($this->input->post()==NULL){
+			$this->load->view('formkodeaset');
+		}else {
+			$post= $this->input->post();
+			$w= strlen($post['kodeaset']);
+			if($this->Bmn_model->chkkdaset($post['kodeaset'])->num_rows()>0){
+				$this->session->set_flashdata('error', "Kode aset sudah terekam...!");
+				redirect(base_url()."bmn/createkodeaset");
+			}else {
+				//cegah jika panjang data kode aset kurang dari sepuluh
+				// lagi di lab
+				$w= strlen($post['kodeaset']);
+				if($w==10){
+					//lanjutkan insert data kode aset
+					$data= array('kodeBarang'=>$post['kodeaset'],'jenisBarang'=>$post['jenis_barang']);
+					$query121= $this->Bmn_model->insertkdaset($data);
+					if($query121 > 0){
+						$this->session->set_flashdata('ok', "Data berhasil di rekam...");
+						redirect(base_url()."bmn/createkodeaset");
+					}else {
+						$this->session->set_flashdata('error', "Data gagal di input, silahkan hubungi administrator");
+						redirect(base_url()."bmn/createkodeaset");
+					}
+				}else {
+					$this->session->set_flashdata('error', "Panjang data Kode Aset Harus 10 Digit! ");
+					redirect(base_url()."bmn/createkodeaset");
+				}
+			}
+		}
+
+	}
 
 //ini bener bener yang menjadi judul projek ini
 
 	function bast(){
+		if ($this->session->userdata('admin')!=1) {
+			echo "Mohon maaf, sistem hanya melayani pengguna terdaftar.!";
+			echo "<a href=".base_url()."> Login =>></a>";
+			exit();
+		}
 		$tahun=date('Y');
 		$data['noawal']= $this->Bmn_model->maxnobast($tahun)->row()->maxno;
 
@@ -270,8 +325,8 @@ class Bmn extends CI_Controller {
 			//bikin cegahan bast yang sudah ada
 			$bast=$this->input->post('bast');
 
-			if ($this->Bmn_model->bastada($bast)==TRUE) {
-				$this->session->set_flashdata('error', 'BAST SUDAH DI REKAM SILAHKAN GUNAKAN NOMOR LAIN ');
+			if ($this->Bmn_model->bastada($bast)->num_rows()>0) {
+				$this->session->set_flashdata('error', 'Nomor BAST ini sudah digunakan, silahkan gunakan nomor BAST yang lain. ');
 				redirect(base_url().'bmn/bast');
 			}else {
 				//bikin cegahan user ! pns
@@ -296,7 +351,7 @@ class Bmn extends CI_Controller {
 		$this->load->view('formbarcode');
 		$bast= $this->session->userdata('bast');
 		$data['aset']= $this->Bmn_model->arraydipilih($bast)->result_array();
-		$this->load->view('arraydipilih', $data);
+		$this->load->view('arraybast', $data);
 	}
 
 	function insertbast(){
@@ -311,6 +366,7 @@ class Bmn extends CI_Controller {
 				//di idle ada lanjut ke
 				$adata= array (	'id'			=>null,
 												'barcode'	=>$barcode,
+												'nama'		=>$this->session->userdata('user'),
 												'nip'			=>$this->session->userdata('nip_user'),
 												'no'			=>$this->session->userdata('no'),
 												'bast'		=>$this->session->userdata('bast'),
@@ -319,7 +375,9 @@ class Bmn extends CI_Controller {
 				if($this->Bmn_model->insertbast($adata)>0){
 					$asetdata = array (	'lokasi' 		=> $lokasi,
 															'pengguna' 	=> $pengguna,
-															'pic'				=> $this->session->userdata('nip_user')
+															'pic'				=> $this->session->userdata('user'),
+															'nip_pic'		=> $this->session->userdata('nip_user'),
+															'bast'			=> $this->session->userdata('bast')
 														);
 					$this->Bmn_model->updateasetjuga($barcode, $asetdata);
 					$this->session->set_flashdata('true', 'OK');
@@ -330,12 +388,12 @@ class Bmn extends CI_Controller {
 				}
 			}else {
 				//di idle tidak ada berarti aset lagi di pake sama orang (cegah)
-				$msg= $this->Bmn_model->cegah($barcode)->row();
+				$msg= $this->Bmn_model->bastbc($barcode)->row();
 				$nip=$msg->nip;
 				$wherepns='nip';
 				$nilai=$nip;
 				$nama= $this->Bmn_model->wherepns($wherepns, $nilai)->row();
-				$this->session->set_flashdata('error','Aset masih digunakan oleh '.$nama->nama.' dengan nomor bast '.$msg->bast.'<br>');
+				$this->session->set_flashdata('error','Aset masih digunakan oleh '.$nama->nama.' dengan nomor BAST '.$msg->bast.'<br>');
 				redirect(base_url().'bmn/formbarcode');
 			}
 		}else {
@@ -343,140 +401,377 @@ class Bmn extends CI_Controller {
 			redirect(base_url().'bmn/formbarcode');
 		}
 	}
-	function odtbast(){
-		$this->load->view('odtbast');
-	}
-	function pdfbast(){
-		$bast= $this->input->post('bast');
-		if ($this->Bmn_model->wherenobast($bast)->num_rows()>0) {
-			//var buat ngambil isian
-			$wherepns= 'nip';
-			$nilai= $this->Bmn_model->wherenobast($bast)->row()->nip;
-			$tanggal= $this->Bmn_model->wherenobast($bast)->row();
 
-			//isian buat pdfbast
-			$data['karo1']=$this->Bmn_model->karo()->row();
-			$data['user']=$this->Bmn_model->wherepns($wherepns, $nilai)->row();
-			$data['aset']=$this->Bmn_model->arraydipilih($bast);
-			$data['kabag']=$this->Bmn_model->kabagbmn()->row();
-			$data['bast']=$this->Bmn_model->wherenobast($bast)->row();
-			$data['tanggal']=$tanggal->thn.'-'.$tanggal->bln.'-'.$tanggal->tgl;
-			$this->load->view('pdfbast', $data);
-			$this->session->unset_userdata('no');
-			$this->session->unset_userdata('bast');
-			$this->session->unset_userdata('user');
-			$this->session->unset_userdata('nip_user');
-		}else {
-			$this->session->set_flashdata('error', 'Tidak ada data');
-			redirect(base_url().'bmn/formbarcode');
+	function drafbast()
+	{
+		if (is_null($this->session->userdata('bast')))
+		{
+			echo "Silahkan set dulu BAST nya...<a href='setbast'>Set BAST</a>";
+		}
+		else
+		{
+			$x=$this->session->userdata('bast');
+			$y=$this->Bmn_model->bastada($x)->row()->file;
+			if (is_null($y)) {
+				$x= $this->session->userdata('bast');
+				$data['bast']= $this->Bmn_model->bastada($x);
+				$data['aset']= $this->Bmn_model->asetbast($x);
+				$data['user']= $this->Bmn_model->wherepns('nip', $this->session->userdata('nip_user'));
+				$this->load->view('drafbast', $data);
+			}
+			else
+			{
+				echo "file sudah terupload. !";
+			}
 		}
 	}
 
-	function unset(){
-		$asession = array('no', 'bast', 'user', 'nip');
-		$this->session->unset_userdata($asession);
-		redirect(base_url().'bmn/bast');
+
+//projeksi berita acara pengembalian sebagai counter dari beria acara serah terima dan sekalian sebagai history aset
+	function bap()
+	{
+		$tahun= date('Y');
+		$data['noawal']= $this->Bmn_model->maxnobap($tahun)->row()->maxno;
+		if ($this->input->post()==NULL)
+		{
+			$this->load->view('bap', $data);
+		}
+		else
+		{
+			$x= $this->input->post('user');
+			$y= $this->Bmn_model->wherepns('nama',$x)->row()->nip;
+			$z= $this->input->post('bap');
+			//check di tabel bap nomor ini ada gak kalau ada return nomor udah ada
+			$a= $this->Bmn_model->bapada($z)->num_rows();
+			if ($a > 0)
+			{
+				$this->session->set_flashdata('error','Nomor BAP sudah digunakan, silahkan gunakan nomor lain.!');
+				redirect(base_url()."bmn/bap");
+			}
+			else
+			{
+				$this->session->set_userdata(array(
+																						'bap'					=>$this->input->post('bap'),
+																						'no'					=>$this->input->post('no'),
+																						'user'				=>$this->input->post('user'),
+																						'nip_user'		=>$y
+																						));
+				redirect (base_url().'bmn/bapbc');
+			}
+		}
 	}
+	//tindak lanjut dari isian form nomor bap
+	function bapbc()
+	{
+		if (!is_null($this->session->userdata('bap')))
+		{
+			$this->load->view('formbapbc');
+			$x= $this->session->userdata('nip_user');
+			$y= $this->session->userdata('bap');
+			$data= $this->Bmn_model->baparray($x, $y);
+			if ($data->num_rows() > 0)
+			{
+				$z['data']= $data->result_array();
+				$this->load->view('arraybap', $z);
+			}
+			else
+			{
+				$z= array(
+										'barcode'		=> null,
+										'nip'				=> null,
+										'bap'				=> null,
+										'tgl'				=> null,
+										'bast'			=> null,
+										'tgl_bast'	=> null,
+										'file_bast'	=> null);
+				$this->load->view('arraybap', $z);
+			}
+		}
+		else
+		{
+			if($this->session->userdata('bap'))
+			{
+				redirect(base_url().'bmn/bap');
+			}
+			else
+			{
+				echo "Mohon maaf, sistem hanya melayani pengguna terdaftar.!";
+				echo "<a href=".base_url()."> Login =>></a>";
+				exit();
+			}
+		}
+	}
+	//panggil fungsi lain dengan segala kondisi
+	function checkbap(){
+		$this->bacasesi();
+		$x= $this->input->post('barcode');
+		$b= $this->session->userdata('nip_user');
+		$y= $this->Bmn_model->bastbc($x)->row()->nip;
+		if ($b==$y) {
+			//insert BAP
+			//lanjutkan coding insert bap ke database
+			$a= $this->Bmn_model->bastbc($x)->row();
+			if (is_null($a->file)) {
+				$this->session->set_flashdata('error',"BAST belum di upload ke server!");
+				redirect(base_url()."/bmn/bapbc");
+				exit();
+			}
+				 $data= array(
+					 'id'					=>	null,
+					 'barcode'		=>	$this->input->post('barcode'),
+					 'nama'				=>	$this->session->userdata('user'),
+					 'nip'				=>	$this->session->userdata('nip_user'),
+					 'no'					=> 	$this->session->userdata('no'),
+					 'bap'				=>	$this->session->userdata('bap'),
+					 'tgl'				=>	date('Y-m-d'),
+					 'file'				=>	null,
+					 'bast'				=>	$a->bast,
+					 'tgl_bast'		=>	$a->tgl,
+					 'file_bast'	=>	$a->file
+				 );
+			//code insertbap
+			$c= $this->Bmn_model->insertbap($data);
+			if($c > 0)
+			{
+				//update aset
+				$d= $this->Bmn_model->updateasetnull($x);
+				if($d > 0)
+				{
+					//delete bast
+					$this->Bmn_model->deletebast($a->id);
+					redirect(base_url()."bmn/bapbc");
+				}
+				else
+				{
+					$this->session->set_flashdata('error',"terjadi kesalahan query pada pemindahan BAST ke BAP !");
+					redirect(base_url()."/bmn/bapbc");
+				}
+			}
+			else
+			{
+				$this->session->set_flashdata('error',"terjadi kesalahan query pada update aset !");
+				redirect(base_url()."/bmn/bapbc");
+			}
+		}
+		else
+		{
+			//session flash error aset bukan milik user tersebut tapi milik user lain, ambil data dari database
+			if ($this->Bmn_model->wherepns('nip', $y)->row()>0)
+			{
+				$z= $this->Bmn_model->wherepns('nip', $y)->row()->nama;
+				$this->session->set_flashdata('error',"Aset ini di BAST a/n ".$z);
+				redirect(base_url()."/bmn/bapbc");
+			}
+			else
+			{
+				$f= $this->Bmn_model->bastbc($x)->row()->pic;
+				if (is_null($f))
+				{
+					$this->session->set_flashdata('error',"Aset belum dipegang user manapun...!!!");
+					redirect(base_url()."/bmn/bapbc");
+				}
+				else
+				{
+					$this->session->set_flashdata('error',"! Tidak ada aset dengan barcode seperti demikian");
+					redirect(base_url()."/bmn/bapbc");
+				}
+			}
+		}
+	}
+	function drafbap(){
+		if (is_null($this->session->userdata('bap')))
+		{
+			echo "Silahkan set dulu Nomro BAP nya...<a href='setbap'>Set Nomor BAP</a>";
+		}
+		else
+		{
+			$x=$this->session->userdata('bap');
+			$y=$this->Bmn_model->bapada($x)->row()->file;
+			if (is_null($y)) {
+				$x= $this->session->userdata('bap');
+				$bapada= $this->Bmn_model->bapada($x);
+				$data['bap']= $bapada;
 
-//BAST ada revisi silah menyesuaikan dengan fungsi model di bastaktif
+				//silahkan sesuaikan
+				$data['aset']= $this->Bmn_model->asetbap($x);
 
-
-
+				$data['user']= $this->Bmn_model->wherepns('nip', $this->session->userdata('nip_user'));
+				$this->load->view('drafbap', $data);
+			}
+			else
+			{
+				echo "file sudah terupload. !";
+			}
+		}
+	}
 // berita acara pengembalian
-	function bap(){
-		//19940911 201902 1 004   BASTBMN-1/SET.M.EKON.3.3/01/2020
-		$bast='BASTBMN-1/SET.M.EKON.3.3/01/2020';
-		$nip='19940911 201902 1 004';
-		$data['bast']= $this->Bmn_model->untukbap($bast, $nip)->result();
-		$this->load->view('bap', $data);
-	}
-
-	//fungsi fungsi lain yang menjadi garapan
-	function balikin(){
-		$this->load->view('balikin');
-	}
-
-
-
-
-
 	function lab(){
-		$tahun=date('Y');
-		$nobast6digit= $this->Bmn_model->maxnobast($tahun)->row()->maxno;
+		$x= $this->uri->segment(3);
+		if ($x==null) {
+			echo "uri segment 3 null";
+		}
+		else
+		{
+			echo "uri segment 3 tidak null";
+		}
+		// $bast= "BASTBMN-1/SET.M.EKON.3.3/03/2020";
+		// $x= $this->Bmn_model->bastada($bast);
+		// print_r($x->num_rows());
+
+		// $x= "BASTBMN-1/SET.M.EKON.3.3/03/2020";
+		// $y= $this->Bmn_model->fileada($x)->row()->file;
+		// if($y==null){
+		// 	echo "null";
+		// }else {
+		// 	echo "not null";
+		// }
 
 
 
-		// if($this->session->userdata())
-		// $this->load->view('lab');
 		//sprintf('%04d', $this->input->post('nup'));
-		// echo uniqid();
-		// $this->load->view("lab");
+		// uniqid();
 		// echo $this->uri->segment(3);
 		// echo $this->uri->segment(4);
 		// echo md5('asep');
 	}
-	function restapi(){
-		$this->load->view('restapi');
-	}
-	function tmbasetpkpj(){
-		//kondisinya harus aset.user==null && aset.bast==NULL
-		//trus check model (hanya jabatan dengan kepala subbagian aset tetap dan pemeliharaan yang bisa masuk)
-		$nama="kepala subbagian aset tetap dan pemeliharaan";
-		echo $nama;
-	}
-	function listfile(){
-		$this->load->view('../../uploads/DirectoryLister/index.php');
-	}
-	function upload(){
-  	$this->load->view('upload_form', array('error' => ' ' ));
-  }
-  function do_upload(){
-	  $config['upload_path']          = './uploads/';
-	  $config['allowed_types']        = 'gif|jpg|png|pdf';
-	  $this->load->library('upload', $config);
-	  if ( ! $this->upload->do_upload('userfile')){
-	    $error = array('error' => $this->upload->display_errors());
-	    $this->load->view('upload_form', $error);
-    }else{
-      $data = array('upload_data' => $this->upload->data());
-      $this->load->view('upload_success', $data);
-    }
-  }
-	function arraybast(){
-		$data['bast']=$this->Bmn_model->bastnotfixyet()->result();
-		$this->load->view('arraybast',$data);
-	}
-	function pakaipinjam(){
-		if(($this->uri->segment(3)==true)xor(!empty($this->input->post()))){
-			$this->session->set_userdata('bc',$this->uri->segment(3));
-			$this->load->view('formpkpj');
-		}elseif (!empty($this->input->post())) {
-			$bc=$this->session->userdata('bc');
-			$nama=$this->input->post('nama');
-			$tujuan=$this->input->post('tujuan');
-			$tgl=$this->input->post('tglpinjam');
-			if ($this->Bmn_model->chkpkpj($bc)==false) {
-				if($this->Bmn_model->pkpjin($bc, $tujuan, $tgl, $nama)==true){
-					echo "Data pakai pinjam direkam.";
-				}else {
-					echo "Gagal entri data pakai pinjam ke database";
-				}
+
+
+
+
+
+
+	function setbast(){
+		if (is_null($this->input->post('nobast'))) {
+			$this->load->view('setbast');
+		}else {
+			if ($this->Bmn_model->bastada($this->input->post('nobast'))->num_rows() > 0) {
+				$this->session->set_userdata('bast', $this->input->post('nobast'));
+				$this->session->set_flashdata('ok', "Nomor BAST sudah di set dengan nomor: ".$this->session->userdata('bast')."");
+				redirect(base_url()."bmn/bast");
 			}else {
-				echo "Aset sedang dalam pakai pinjam user lain.";
+				$this->session->set_flashdata('error', 'Tidak ada BAST dengan nomor demikian, set ulang nomor BAST.');
+				redirect(base_url()."bmn/setbast");
 			}
-		} else {
-			$data['pkpj']=$this->Bmn_model->pkpj();
-			$this->load->view('formpkpj', $data);
 		}
 	}
-	function emailgateway(){
-		if (!empty($this->input->post('email'))) {
+	function uploadbast(){
+		if (is_null($this->session->userdata('bast')))
+		{
+			$this->session->set_flashdata('error', 'Nomor BAST belum di set, Silahkan set terlebih dahulu nomor BASTnya.');
+			redirect(base_url()."bmn/setbast");
+		}
+		else
+		{
+			$x= $this->session->userdata('bast');
+			if($this->Bmn_model->bastada($x)->num_rows() > 0){
+				$y= $this->Bmn_model->bastada($x)->row()->file;
+				if($y==null){
+					if (empty($this->input->post('submit'))) {
+						$this->load->view('upload_bast',  array('error'=> ''));
+				 	}else {
+						$config['upload_path']          = './bast/';
+						$config['allowed_types']        = 'pdf';
+						$config['file_name']        		= uniqid();
+						$this->load->library('upload');
+						$this->upload->initialize($config);
+						if ( ! $this->upload->do_upload('userfile')){
+							$error = array('error' => $this->upload->display_errors());
+							$this->load->view('upload_bast',  $error);
+						}else {
+							$data = array('upload_data' => $this->upload->data());
+							$bast=$this->session->userdata('bast');
+							$nfile= $this->upload->data('orig_name');
+							$this->Bmn_model->updatefilebast($bast, $nfile);
+							$this->load->view('upload_success', $data);
+						}
+				 	}
+				}
+				else
+				{
+					$this->session->set_flashdata('error', 'file dengan nomor BAST: '.$this->session->userdata('bast').' sudah di upload,  Set Nomor BAST lain.?');
+					redirect(base_url()."bmn/setbast");
+				}
+			}
+			else
+			{
+				$this->session->set_flashdata('error', 'tidak ada BAST dengan nomor: '.$this->session->userdata('bast').' ,  Set Nomor BAST lain.?');
+				redirect(base_url()."bmn/setbast");
+			}
+		}
+  }
+
+	function setbap(){
+		if (is_null($this->input->post('nobap'))) {
+			$this->load->view('setbap');
+		}else {
+			if ($this->Bmn_model->bapada($this->input->post('nobap'))->num_rows() > 0) {
+				$this->session->set_userdata('bap', $this->input->post('nobap'));
+				echo "Nomor BAP sudah di set dengan nomor: ".$this->session->userdata('bap')." <a href='uploadbap'>Lanjut Upload</a>";
+			}else {
+				echo "tidak ada bap dengan nomor demikian <a href=>input lagi</a>";
+			}
+		}
+	}
+
+	//done
+	function uploadbap()
+	{
+		if (is_null($this->session->userdata('bap')))
+		{
+			echo "Silahkan set dulu BAP nya...<a href='setbap'>Set BAP</a>";
+		}
+		else
+		{
+			$x=$this->session->userdata('bap');
+			$y=$this->Bmn_model->bapada($x)->num_rows();
+			if ($y > 0)
+			{
+				//proses row()
+				$y=$this->Bmn_model->bapada($x)->num_rows();
+				if (empty($this->input->post('submit')))
+				{
+					$this->load->view('upload_bap',  array('error'=> ''));
+				}
+				else
+				{
+					$config['upload_path']          = './bap/';
+					$config['allowed_types']        = 'pdf';
+					$config['file_name']        		= uniqid();
+					$this->load->library('upload');
+					$this->upload->initialize($config);
+					if ( ! $this->upload->do_upload('userfile'))
+					{
+						$error = array('error' => $this->upload->display_errors());
+						$this->load->view('upload_bap',  $error);
+					}
+					else
+					{
+						$data = array('upload_data' => $this->upload->data());
+						$bap=$this->session->userdata('bap');
+						$nfile= $this->upload->data('orig_name');
+						$this->Bmn_model->updatefilebap($bap, $nfile);
+						$this->load->view('upload_success', $data);
+					}
+				}
+			}
+			else
+			{
+				$this->session->set_flashdata('error', 'Nomor BAP tersebut belum ada di database, silahkan set dulu nomor BAP.');
+				redirect(base_url().'bmn/setbap');
+			}
+		}
+	}
+
+	function emailgateway()
+	{
+		if (!empty($this->input->post('email')))
+		{
 		$config= array(
 			'protocol' => 'smtp',
 			'smtp_host'=> 'ssl://smtp.googlemail.com',
 			'smtp_port'=> 465,
 			'smtp_user'=> 'bmnkemenkoperekonomian@gmail.com',
-			'smtp_pass'=> 'gratisaja',
+			'smtp_pass'=> 'Bmn_M3nk0',
 			'mailtype' => 'html',
 			'charset' => 'iso-8859-1'
 			);
@@ -487,12 +782,17 @@ class Bmn extends CI_Controller {
 		$this->email->subject('Bukti kembali pakai Pinjam BMN');
 		$this->email->message('File terlampir.');
 		$this->email->attach('assets/tanda kembali pakai pinjam.pdf');
-			if(!$this->email->send()){
+			if(!$this->email->send())
+			{
 	    	echo $this->email->print_debugger();
-			}else{
+			}
+			else
+			{
 			  echo "Email berhasil dikirim";
 			}
-		}else {
+		}
+		else
+		{
 			$this->load->view('formemailgateway');
 		}
 	}
@@ -500,49 +800,64 @@ class Bmn extends CI_Controller {
 	function nd(){
 		$barcode= $this->uri->segment(3);
 		$nip=$this->session->userdata('nip');
-		$panggil=$this->session->userdata('panggil');
-		$keruksakan=$this->input->post('uraiankeruksakan');
-		$sps = array 	(	'no' 					=> '',
-										'nosps'				=> '',
+		$panggil=$this->session->userdata('email');
+		$datasps= array 	(	'no' 					=> '',
 		 								'barcode'			=>$barcode,
-										'nama'				=>$nip,
-										'keruksakan'	=>$keruksakan,
+										'nip'				=>$nip,
 										'tanggal'			=>date('Y-m-d')
 									);
-		if (empty($keruksakan)){
-			$this->load->view('uraiankeruksakan');
-		}else {
-			$query= $this->Bmn_model->sps($sps);
-			$data['aset']= $this->Bmn_model->barcode($barcode)->row();
-			$wherepns='nama';
-			$nilai=	$nip;
-			$data['user']= $this->Bmn_model->wherepns($wherepns, $nilai)->row();
-			$data['keruksakan']=$keruksakan;
-			$this->load->view('ndperbaikan',$data);
-		}
+			$aset= $this->Bmn_model->barcode($barcode);
+			$user= $this->Bmn_model->wherepns('nip', $nip);
+
+			if (($aset->num_rows() > 0)&&($user->num_rows() > 0))
+			{
+				//fungsi cegah selama satu bulan dan fungsi cetak ulang
+				$blnthn= date('Y-m');
+				$sps= $this->Bmn_model->spsperbulan($blnthn)->num_rows();
+
+				if (($sps > 0)&&($this->uri->segment(4)==null))
+				{
+					// code... sps sudah ada dan belum lebih dari satu bulan TOLAK
+					echo 	"Aset belum lama di perbaiki, apakan aset anda benar-benar rusak lagi? <a href=".$barcode."/1>Lapor keruksakan lagi => </a><br><br><br>
+								 Cetak ulang nota dinas permohonan perbaikan <a href=".$barcode."/2>Cetak ulang Nota Dinas => </a>";
+				}
+				elseif ($this->uri->segment(4)==1)
+				{
+					// code... jadi ceritanya lain, cuman ganti bentuk dokumen nota dinas doang.
+					echo 	"code untuk laporan aset yang dalam satu bulan rusak lebih dari satu kali<br>
+								 jadi ceritanya cuman ganti dokumen nota dinas doang.";
+				}
+				elseif ($this->uri->segment(4)==2)
+				{
+					// code...
+					$data['aset']= $aset->row();
+					$data['user']= $user->row();
+					$this->load->view('ndperbaikan',$data);
+				}
+				else
+				{ // rekam ke database
+					print_r($datasps);
+					$rekam= $this->Bmn_model->rekamsps($datasps);
+					if ($rekam == TRUE)
+					{
+						// code...
+						$data['aset']= $aset->row();
+						$data['user']= $user->row();
+						$this->load->view('ndperbaikan',$data);
+					}
+				}
+			}
+			else
+			{
+				echo "Mohon maaf, sistem hanya melayani pengguna terdaftar.!";
+				echo "<a href=".base_url()."> Login =>></a>";
+				exit();
+			}
+
+
+
 	}
-	function accsps(){
-		$nama=$this->session->userdata('nama');
-		$data['variable']= $this->Bmn_model->accsps();
-		$this->load->view('accsps',$data);
-	}
-	function ctsps(){
-		$getno		= $this->uri->segment(3);
-		$nosps		= $this->input->post('nosps');
-		if (empty($nosps)){
-			$data['max']= $this->Bmn_model->max();
-			$this->load->view('spsperid',$data);
-		}else {
-			$query= $this->Bmn_model->ctsps($getno, $nosps);
-			$nama= $this->session->userdata('nama');
-			$query= $this->Bmn_model->spsperid($getno);
-			$barcode= $query->barcode;
-			$data['user']	= $this->Bmn_model->carinip($nama);
-			$data['aset']	= $this->Bmn_model->barcode($barcode)->row();
-			$data['sps']	= $this->Bmn_model->spsperid($getno);
-			$this->load->view('sps', $data);
-		}
-	}
+
 	function search_username(){
 			$username = trim($this->input->get('term', TRUE)); //get term parameter sent via text field. Not sure how secure get() is
       $this->db->select('nama');
@@ -584,6 +899,64 @@ class Bmn extends CI_Controller {
           $data['response'] = 'false'; //Set false if user not valid
       }
       echo json_encode($data);
+		}
+
+		function search_nobast(){
+			$nobast = trim($this->input->get('term', TRUE)); //get term parameter sent via text field. Not sure how secure get() is
+      $this->db->select('bast');
+      $this->db->from('bast');
+      $this->db->like('bast', $nobast);
+			$this->db->limit(9);
+			$this->db->distinct();
+      $query = $this->db->get();
+
+			if ($query->num_rows() > 0){
+          $data['response'] = 'true'; //If username exists set true
+          $data['message'] = array();
+          foreach ($query->result() as $row){
+						$data['message'][] = array(
+                  'value' => $row->bast
+              );
+          }
+      }
+      else
+      {
+          $data['response'] = 'false'; //Set false if user not valid
+      }
+      echo json_encode($data);
+		}
+
+		function search_nobap(){
+			$nobap = trim($this->input->get('term', TRUE)); //get term parameter sent via text field. Not sure how secure get() is
+      $this->db->select('bap');
+      $this->db->from('bap');
+      $this->db->like('bap', $nobap);
+			$this->db->limit(9);
+			$this->db->distinct();
+      $query = $this->db->get();
+
+			if ($query->num_rows() > 0){
+          $data['response'] = 'true'; //If username exists set true
+          $data['message'] = array();
+          foreach ($query->result() as $row){
+						$data['message'][] = array(
+                  'value' => $row->bap
+              );
+          }
+      }
+      else
+      {
+          $data['response'] = 'false'; //Set false if user not valid
+      }
+      echo json_encode($data);
+		}
+
+		function bacasesi(){
+			print_r($this->session->userdata());
+		}
+
+		function restapi(){
+			$this->load->view('restapi');
 		}
 }
 ?>

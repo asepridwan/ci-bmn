@@ -11,8 +11,6 @@
 <li><?php echo $item;?>: <?php echo $value;?></li>
 <?php endforeach; ?>
 </ul>
-
-<p><?php echo anchor('bmn/upload', 'Upload Another File!'); ?></p>
-
+<a href="index">Kembali ke Indeks</a>
 </body>
 </html>

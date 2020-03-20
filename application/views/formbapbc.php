@@ -8,21 +8,17 @@
 <?php include_once 'navbar-atas/awal.php';?>
 <div class="container">
   <p><strong>
-    <?= $this->session->userdata('user')."<br>".$this->session->userdata('bast'); ?>
+    User:  <?= $this->session->userdata('user'); ?><br>
+    Nomor: <?= $this->session->userdata('bap'); ?><br>
   </strong></p>
-  <form method="post" action="<?= base_url(); ?>bmn/insertbast">
+  <form method="post" action="<?= base_url(); ?>bmn/checkbap">
     <div class="form-group">
-      <input type="text" maxlength="14" name="barcode" class="form-control" placeholder="Barcode" required>
-    </div>
-    <div class="form-group">
-      <input type="text" name="lokasi" class="form-control" placeholder="Lokasi" required>
-    </div>
-    <div class="form-group">
-      <input type="text" name="pengguna" class="form-control" placeholder="Pengguna" required>
+      <input type="text" name="barcode" maxlength="14" class="form-control" placeholder="Barcode" required>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
     <a style="float:right;" class="btn btn-primary" role="button" href="drafbap">Draf BAP</a>
   </form>
+
   <?php if (!is_null($this->session->flashdata('error'))): ?>
   <div class="alert alert-warning">
     <strong>!. <?= $this->session->flashdata('error'); ?></strong>
