@@ -38,9 +38,9 @@ $pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8',
 // set document information
 $pdf->SetCreator(PDF_CREATOR);
 $pdf->SetAuthor('Asep Ridwan');
-$pdf->SetTitle('Berita Acara');
-$pdf->SetSubject('BAST');
-$pdf->SetKeywords('TCPDF, PDF, BAST, BAPP, BMN');
+$pdf->SetTitle('Nota Dinas Perbaikan');
+$pdf->SetSubject('ND');
+$pdf->SetKeywords('TCPDF, PDF, ND, BMN');
 
 // remove default header/footer
 $pdf->setPrintHeader(false);
@@ -55,7 +55,7 @@ $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
 // $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
 
 // set auto page breaks
-$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+$pdf->SetAutoPageBreak(TRUE, 0);
 
 // set image scale factor
 $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
@@ -70,6 +70,10 @@ $pdf->AddPage();
 $pdf->Image('application\views\Garuda_Pancasila.png', 0, 10, 0, 0, 'png', '', '', false, 80, 'C', false, false, 1, false, false, false);
 
 // set some text to print
+
+// php intl spell number
+$f = new NumberFormatter("id", NumberFormatter::SPELLOUT);
+
 //dapatkan nama hari nama bulan teks tanggal teks tahun
 $bulan = array(
                 '01' => 'Januari',
@@ -88,7 +92,7 @@ $bulan = array(
 
 $txt1='	<br><br>
         <strong>KEMENTERIAN KOORDINATOR BIDANG PEREKONOMIAN<br>
-				REPUBLIK INDONESIA</strong><br><br>website: www.ekon.go.id';
+				REPUBLIK INDONESIA<br>'.mb_strtoupper($user->unit).'</strong><br>Jl. Lapangan Banteng Timur Nomor 2-4 Jakarta 10710<br>website: www.ekon.go.id';
 $pdf->WriteHTML($txt1,true,false,false,false,'C');
 
 $txt2='	<hr>';
@@ -178,21 +182,21 @@ $txt6=   '<table>
 						<tr>
 					  	<td width="25%"><p style="text-indent: 30px">Gedung</p></td>
 					    <td width="2%">:</td>
-					    <td width="73%">...............................................................................................................</td>
+					    <td width="73%">'.$aset->gedung.'</td>
 					  </tr>
 					  <tr>
 					    <td><p style="text-indent: 30px">Lantai</p></td>
 					    <td>:</td>
-					    <td>...............................................................................................................</td>
+					    <td>'.$aset->lantai.' ('.ucwords($f->format($aset->lantai)).')</td>
 					  </tr>
 						<tr>
 					    <td><p style="text-indent: 30px">Ruang</p></td>
 					    <td>:</td>
-					    <td>...............................................................................................................</td>
+					    <td>'.$aset->ruang.'</td>
 					  </tr>
 					</table>
-					<p style="text-indent: 30px">Perlu dilakukan perbaikan/service karena mengalami keruksakan atau perangkat tidak berfungsi baik sebagaimana mestinya.</p>
-					<p style="text-indent: 30px">Sehubungan dengan hal tersebut diatas, kami mohon kiranya dapat dilaksanakan perbaikan/service dalam waktu yang tidak terlalu lama.</p>
+          <p style="text-indent: 30px">Belum lama ini aset tersebut pernah dilakukan perbaikan/service karena mengalami keruksakan, namun aset tersebut mengalami keruksakan lagi.</p>
+          <p style="text-indent: 30px">Sehubungan dengan hal tersebut diatas, kami mohon kiranya dapat dilaksanakan perbaikan/service kembali sehingga aset tersebut benar-benar dapat di pergunakan.</p>
 					<p style="text-indent: 30px">Atas perhatian dan bantuan Saudara, kami ucapkan terima kasih.<br></p>';
 $pdf->WriteHTML($txt6,true,false,false,false,'J');
 

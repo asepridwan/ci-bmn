@@ -104,31 +104,32 @@
 
 
                     <!-- <input type="submit" name="submit" value="Submit"> -->
-                    <?php if(!empty($this->session->flashdata('errorRegistrasi'))){
-                      echo "<p style='color:black; background:red; font-weight:bold;'>".$this->session->flashdata("errorRegistrasi")."</p>";
-                    }
-                    ?>
-                    <?php if(!empty($this->session->flashdata('errorpassword'))){
-                      echo "<p style='color:black; background:red; font-weight:bold;'>".$this->session->flashdata("errorpassword")."</p>";
-                    }
-                    ?>
+                    <?php if (!is_null($this->session->flashdata('error'))): ?>
+                    <div class="alert alert-warning">
+                      <strong>!. <?= $this->session->flashdata('error'); ?></strong>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
       </form>
       </body>
+
       <script>
         var password = document.getElementById("password")
         , confirm_password = document.getElementById("confirm_password");
 
-        function validatePassword(){
-        if(password.value != confirm_password.value) {
-          confirm_password.setCustomValidity("Passwords tidak sama");
-        } else {
-          confirm_password.setCustomValidity('');
+        function validatePassword()
+        {
+          if(password.value != confirm_password.value)
+          {
+            confirm_password.setCustomValidity("Passwords tidak sama");
+          }
+          else
+          {
+            confirm_password.setCustomValidity('');
+          }
         }
-        }
-
         password.onchange = validatePassword;
         confirm_password.onkeyup = validatePassword;
       </script>

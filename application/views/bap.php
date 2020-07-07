@@ -43,8 +43,8 @@
 
               <div class="form-label-group">
                 <input name="user" type="text" id="nama" class="form-control" placeholder="Mohon pilih dari menu popup" required
-                <?php if(!is_null($this->session->userdata('nama_user'))){
-            			echo "value='".$this->session->userdata("nama_user")."'>";
+                <?php if(!is_null($this->session->userdata('user'))){
+            			echo "value='".$this->session->userdata("user")."'>";
             		} ?>
                 <label for="inputPassword">Nama Pengguna Barang Milik Negara</label>
               </div>

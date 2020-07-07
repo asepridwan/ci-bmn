@@ -24,6 +24,13 @@
     <strong>!. <?= $this->session->flashdata('error'); ?></strong>
   </div>
   <?php endif; ?>
+
+  <?php if (!is_null($this->session->flashdata('ok'))): ?>
+  <div class="alert alert-success">
+    <strong>!. <?= $this->session->flashdata('ok'); ?></strong>
+  </div>
+  <?php endif; ?>
+
 </div>
 </body>
 </html>

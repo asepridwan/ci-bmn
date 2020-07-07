@@ -84,13 +84,13 @@
         <td>II</td>
         <td>Nama</td>
         <td>:</td>
-        <td><?= $this->session->userdata('user'); ?></td>
+        <td><?= $user->row()->nama; ?></td>
       </tr>
       <tr>
         <td></td>
         <td>NIP</td>
         <td>:</td>
-        <td><?= $this->session->userdata('nip_user'); ?></td>
+        <td><?= $user->row()->nip; ?></td>
       </tr>
       <tr>
         <td></td>
@@ -185,12 +185,12 @@
       <tr>
         <td style="text-align: center;">Rayani Marlinang</td>
         <td></td>
-        <td style="text-align: center;"><?= $this->session->userdata('user') ?></td>
+        <td style="text-align: center;"><?= $user->row()->nama; ?></td>
       </tr>
       <tr>
-        <td style="text-align: center;">19630226 198310 2 001</td>
+        <td style="text-align: center;">NIP. 19630226 198310 2 001</td>
         <td></td>
-        <td style="text-align: center;"><?= $this->session->userdata('nip_user') ?></td>
+        <td style="text-align: center;">NIP. <?= $user->row()->nip; ?></td>
       </tr>
       <tr>
         <td></td>
@@ -199,7 +199,7 @@
       </tr>
       <tr>
         <td></td>
-        <td style="text-align: center;">19661226 199503 1 001</td>
+        <td style="text-align: center;">NIP. 19661226 199503 1 001</td>
         <td></td>
       </tr>
     </table>

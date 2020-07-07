@@ -55,6 +55,7 @@
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
             <hr class="my-4">
+            <a style="float:left;" href="bap">Kembali ke BAP</a>
           </form>
         </div>
       </div>

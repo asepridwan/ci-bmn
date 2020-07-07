@@ -9,6 +9,7 @@
           <th scope="col">JENIS BARANG</th>
           <th scope="col">MERK / TYPE</th>
           <th scope="col">TANGGAL PEROLEHAN</th>
+          <th scope="col"> X </th>
         </tr>
       </thead>
       <tbody>
@@ -16,10 +17,11 @@
         <?php foreach ($aset as $key): ?>
         <tr>
           <th scope="row"><?=  $x++; ?></th>
-          <td><?php echo $key['barcode'];?></td>
-          <td><?php echo $key['jenis_barang'];?></td>
-          <td><?php echo $key['merk_type'];?></td>
-          <td><?php echo $key['tgl_perolehan'];?></td>
+          <td><?= $key['barcode'];?></td>
+          <td><?= $key['jenis_barang'];?></td>
+          <td><?= $key['merk_type'];?></td>
+          <td><?= $key['tgl_perolehan'];?></td>
+          <td><?= "<a href=formbarcode/".$key['barcode']."> X </a>";?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>

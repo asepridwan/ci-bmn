@@ -11,6 +11,7 @@
           <th scope="col">NOMOR BAST</th>
           <th scope="col">TANGGAL BAST</th>
           <th scope="col">FILE BAST</th>
+          <th scope="col"> X </th>
         </tr>
       </thead>
       <tbody>
@@ -25,12 +26,13 @@
           <td><?= $key['tgl'];?></td>
           <td><?= $key['bast'];?></td>
           <td><?= $key['tgl_bast'];?></td>
-          <td><a href="http://10.2.0.5/ci-bmn/bast/<?= $key['file_bast'];?>" target="_blank"><?= $key['file_bast'];?> <a/></td>
+          <td><a href="http://10.2.0.5/ci-bmn/bast/<?= $key['file_bast'];?>" target="_blank"><?= $key['file_bast'];?> </a></td>
+          <td><a href="xbapbc/<?= $key['id'];?> "> X </a> </td>
         </tr>
       <?php endforeach; ?>
       <?php else: ?>
         <tr>
-          <td colspan="8"><strong>Tidak ada data</strong></td>
+          <td colspan="9"><strong>Tidak ada data</strong></td>
         </tr>
       <?php endif; ?>
       </tbody>
