@@ -8,7 +8,8 @@ class Bmn extends CI_Controller {
 		}
 
 	function index(){
-		if(!is_null($this->session->userdata('email'))){
+		if(!is_null($this->session->userdata('email')))
+		{
 			redirect(base_url().'bmn/profil');
 		}
 		$err['errprofil']=$this->session->flashdata('error');
@@ -1240,7 +1241,7 @@ class Bmn extends CI_Controller {
 		}
 		else
 		{
-			echo "nama atau password salah<br> <a href='".base_url()."/bmn/teknisigerak'>login</a>";
+			echo "nama atau password salah<br> <a href='".base_url()."bmn/teknisigerak'>login</a>";
 		}
 	}
 
@@ -1463,11 +1464,19 @@ class Bmn extends CI_Controller {
 			}
 			else
 			{
-				$config['upload_path']          = '../storage';
-				$this->load->library('upload');
-				$this->upload->initialize($config);
-				$this->upload->do_upload('userfile');
-				$data = array('upload_data' => $this->upload->data());
+				$config['upload_path']          = './file_email/';
+        $config['allowed_types']        = '*';
+
+        $this->load->library('upload', $config);
+
+        if ( ! $this->upload->do_upload('berkas'))
+        {
+	        echo "Gagal";
+        }
+        else
+        {
+	        echo "berhasil";
+        }
 			}
 	  }
 }
